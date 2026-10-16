@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b09">
+<title>PelzX AI Code Assistant 2.1</title>
+<style>
+:root{--bg:#080b09;--panel:#111713;--green:#b6ff3b;--text:#f4f7f3;--muted:#9ba69c;--border:#273329}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
+header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:21px;font-weight:800}.logo span{color:var(--green)}
+.badge{font-size:10px;color:var(--green);border:1px solid var(--green);padding:7px 10px;border-radius:20px;white-space:nowrap}
+main{max-width:850px;width:100%;margin:auto;padding:22px 16px 36px}
+.hero{text-align:center;padding:30px 0}.hero h1{font-size:clamp(28px,7vw,43px);line-height:1.18;margin:0 0 14px}.hero h1 span{color:var(--green)}
+.hero p{color:var(--muted);line-height:1.7;font-size:15px;margin:0}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px}
+label{display:block;margin-bottom:10px;font-size:14px;font-weight:700}
+textarea,select{display:block;width:100%;background:#090e0b;border:1px solid var(--border);border-radius:10px;padding:13px;color:var(--text);font:14px/1.6 Arial,sans-serif;outline:none}
+textarea:focus,select:focus{border-color:var(--green)}
+textarea{min-height:115px;resize:vertical}
+select{margin-top:12px}
+button{border:0;border-radius:9px;padding:13px 15px;font-size:14px;font-weight:700;cursor:pointer}
+button:focus-visible{outline:2px solid white;outline-offset:3px}
+.primary{width:100%;margin-top:13px;background:var(--green);color:#10150b}
+.quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.quick-actions button{background:#182019;color:var(--text);border:1px solid var(--border);min-height:50px}
+.quick-actions button:hover,.secondary:hover{border-color:var(--green)}
+.section-title{font-size:17px;margin:0 0 15px}
+.editor-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+.editor-top h2{font-size:17px;margin:0}.editor-top span{font-size:10px;color:var(--green)}
+#output{min-height:250px;font-family:monospace;font-size:12px;white-space:pre;overflow:auto;tab-size:2}
+.editor-buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.secondary{background:#202b22;color:var(--green);border:1px solid var(--border)}
+.status{color:var(--muted);font-size:12px;margin:12px 0 0;line-height:1.6}
+.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.feature{padding:15px;background:#0d130f;border:1px solid var(--border);border-radius:12px}
+.feature h3{color:var(--green);font-size:14px;margin:0 0 8px}.feature p{color:var(--muted);font-size:12px;line-height:1.6;margin:0}
+footer{text-align:center;padding:24px 15px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;line-height:1.8}
+footer strong{color:var(--green)}
+@media(max-width:400px){header{padding:15px 12px}.logo{font-size:17px}.badge{font-size:9px}.card{padding:14px}.quick-actions button{padding:11px 8px;font-size:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">PelzX <span>AI</span></div>
+  <div class="badge">CODE ASSISTANT 2.1</div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Build smarter.<br><span>Code beyond limits.</span></h1>
+    <p>Your personal coding workspace.<br>Generate starter code, explore examples and learn programming.</p>
+  </section>
+
+  <section class="card">
+    <label for="prompt">What do you want to build?</label>
+    <textarea id="prompt" placeholder="Example: Create a professional login page..."></textarea>
+
+    <label for="language" style="margin-top:14px">Choose a language</label>
+    <select id="language">
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+    </select>
+
+    <button type="button" class="primary" id="generateBtn">Generate Code →</button>
+
+    <div class="quick-actions">
+      <button type="button" data-task="website">🌐 Website Template</button>
+      <button type="button" data-task="button">🔘 Interactive Button</button>
+      <button type="button" data-task="function">⚙️ JavaScript Function</button>
+      <button type="button" id="explainBtn">📚 Explain My Code</button>
+    </div>
+    <p class="status" id="message" role="status" aria-live="polite">Ready. Enter a request or choose a quick action.</p>
+  </section>
+
+  <section class="card">
+    <div class="editor-top"><h2>Code Workspace</h2><span>PELZX EDITION</span></div>
+    <label for="output">Generated code / explanation</label>
+    <textarea id="output" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="// Your generated code will appear here..."></textarea>
+    <div class="editor-buttons">
+      <button type="button" class="secondary" id="copyBtn">Copy Code</button>
+      <button type="button" class="secondary" id="downloadBtn">Download</button>
+      <button type="button" class="secondary" id="clearBtn">Clear</button>
+    </div>
+    <p class="status">This version uses built-in examples. It does not call an online AI model.</p>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">Your Creative Toolkit</h2>
+    <div class="features">
+      <div class="feature"><h3>01 / Code Generator</h3><p>Generate starter templates for supported languages.</p></div>
+      <div class="feature"><h3>02 / Code Explainer</h3><p>Get a basic explanation of common code structures.</p></div>
+      <div class="feature"><h3>03 / Code Workspace</h3><p>Edit, copy and download generated code.</p></div>
+      <div class="feature"><h3>04 / Learn & Build</h3><p>Practise programming with examples.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer><strong>PelzX AI Code Assistant 2.1</strong><br>Designed &amp; Developed by PelzX<br>Design. Decode. Inspire.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /** @param {string} id */
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  const promptBox = byId("prompt");
+  const languageBox = byId("language");
+  const outputBox = byId("output");
+  const message = byId("message");
+
+  /** @param {string} text */
+  function setMessage(text) {
+    message.textContent = text;
+  }
+
+  function generateCode() {
+    const request = promptBox.value.trim().toLowerCase();
+    const language = languageBox.value;
+
+    if (!request) {
+      setMessage("Please type what you want to build first.");
+      promptBox.focus();
+      return;
+    }
+
+    let code = "";
+
+    if (language === "html") {
+      if (request.includes("login") || request.includes("sign in")) {
+        code = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PelzX Login Page</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+  background: #101510; color: white; font-family: Arial, sans-serif; }
+form { width: min(340px, 90%); padding: 25px; border-radius: 14px;
+  background: #202820; }
+h1 { color: #b6ff3b; }
+label { display: block; margin-top: 14px; }
+input, button { width: 100%; padding: 12px; margin-top: 8px;
+  border-radius: 7px; }
+input { border: 1px solid #687368; }
+button { border: 0; background: #b6ff3b; font-weight: bold; }
+</style>
+</head>
+<body>
+<form>
+  <h1>Welcome Back</h1>
+  <label for="email">Email</label>
+  <input id="email" type="email" placeholder="Your email" required>
+  <label for="password">Password</label>
+  <input id="password" type="password" placeholder="Your password" required>
+  <button type="submit">Sign In</button>
+</form>
+</body>
+</html>`;
+      } else {
+        code = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Website</title>
+<style>
+body { margin: 0; padding: 50px 18px; text-align: center;
+  font-family: Arial, sans-serif; background: #101510; color: white; }
+h1 { color: #b6ff3b; }
+button { padding: 12px 18px; border: 0; border-radius: 8px;
+  background: #b6ff3b; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Welcome to My Website</h1>
+<p>Designed and developed by PelzX.</p>
+<button onclick="alert('Welcome!')">Get Started</button>
+</body>
+</html>`;
+      }
+    } else if (language === "css") {
+      code = `/* PelzX CSS Starter */
+:root {
+  --background: #080b09;
+  --panel: #111713;
+  --accent: #b6ff3b;
+  --text: #f4f7f3;
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+button {
+  background: var(--accent);
+  color: #080b09;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}`;
+    } else if (language === "javascript") {
+      if (request.includes("button")) {
+        code = `// Interactive button example
+function handleClick() {
+  alert("Welcome to PelzX!");
+}
+
+// Add this button to an HTML page:
+// <button onclick="handleClick()">Click Me</button>`;
+      } else {
+        code = `// PelzX JavaScript Starter
+function greetUser(name) {
+  return "Welcome, " + name + "!";
+}
+
+const user = "PelzX";
+console.log(greetUser(user));`;
+      }
+    } else if (language === "python") {
+      code = `# PelzX Python Starter
+def greet_user(name):
+    return f"Welcome, {name}!"
+
+user = "PelzX"
+print(greet_user(user))`;
+    }
+
+    outputBox.value = code;
+    setMessage("Code generated successfully! Scroll down to the Code Workspace.");
+    outputBox.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  /** @param {"website" | "button" | "function"} task */
+  function setTask(task) {
+    const tasks = {
+      website: { language: "html", prompt: "Create a professional website template" },
+      button: { language: "javascript", prompt: "Create an interactive button" },
+      function: { language: "javascript", prompt: "Create a JavaScript function" }
+    };
+
+    if (!Object.prototype.hasOwnProperty.call(tasks, task)) {
+      setMessage("That quick action is not available.");
+      return;
+    }
+
+    promptBox.value = tasks[task].prompt;
+    languageBox.value = tasks[task].language;
+    generateCode();
+  }
+
+  function explainCode() {
+    const code = outputBox.value.trim();
+
+    if (!code) {
+      setMessage("First generate code or paste code into the workspace.");
+      outputBox.focus();
+      return;
+    }
+
+    let explanation;
+
+    if (code.includes("<html") || code.includes("<!DOCTYPE html")) {
+      explanation = "HTML EXPLANATION\\n\\n1. <!DOCTYPE html> identifies an HTML5 document.\\n2. <head> contains page metadata and styles.\\n3. <body> contains visible page content.\\n4. CSS controls the appearance.\\n\\nThis is a basic explanation, not a full AI analysis.";
+    } else if (code.includes("def ")) {
+      explanation = "PYTHON EXPLANATION\\n\\n1. def defines a function.\\n2. Indentation groups statements.\\n3. return sends a result back.\\n4. print() displays output.";
+    } else if (code.includes("function") || code.includes("=>")) {
+      explanation = "JAVASCRIPT EXPLANATION\\n\\n1. Functions group reusable instructions.\\n2. Parameters let functions receive values.\\n3. return sends a result back.\\n4. console.log() displays information in the console.";
+    } else {
+      explanation = "CSS EXPLANATION\\n\\n1. Selectors identify elements to style.\\n2. Properties describe what to change.\\n3. Values specify how properties look.\\n4. Curly braces contain declarations.";
+    }
+
+    outputBox.value = explanation;
+    setMessage("Explanation created in the workspace.");
+    outputBox.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  async function copyCode() {
+    const code = outputBox.value;
+    if (!code.trim()) {
+      setMessage("There is no code to copy yet.");
+      return;
+    }
+
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        throw new Error("Clipboard API unavailable");
+      }
+      await navigator.clipboard.writeText(code);
+      setMessage("Code copied successfully!");
+    } catch (error) {
+      outputBox.focus();
+      outputBox.select();
+      outputBox.setSelectionRange(0, outputBox.value.length);
+      setMessage("Code selected. Long-press the selection and choose Copy.");
+    }
+  }
+
+  function downloadCode() {
+    const code = outputBox.value;
+    if (!code.trim()) {
+      setMessage("Generate some code before downloading.");
+      return;
+    }
+
+    const extensions = { html: "html", css: "css", javascript: "js", python: "py" };
+    const extension = extensions[languageBox.value] || "txt";
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "PelzX-Code." + extension;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    setMessage("Download requested. Check your Downloads folder.");
+  }
+
+  function clearCode() {
+    outputBox.value = "";
+    setMessage("Workspace cleared. Ready for your next project.");
+  }
+
+  // Use addEventListener instead of inline onclick handlers.
+  // This keeps all button setup together and avoids reliance on global functions.
+  byId("generateBtn").addEventListener("click", generateCode);
+  byId("explainBtn").addEventListener("click", explainCode);
+  byId("copyBtn").addEventListener("click", copyCode);
+  byId("downloadBtn").addEventListener("click", downloadCode);
+  byId("clearBtn").addEventListener("click", clearCode);
+
+  document.querySelectorAll("[data-task]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      setTask(button.getAttribute("data-task"));
+    });
+  });
+})();
+</script>
+</body>
+</html>
